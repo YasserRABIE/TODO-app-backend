@@ -9,13 +9,18 @@ import (
 	"gorm.io/gorm"
 )
 
+var DB *gorm.DB
+
 func ConnectToDB() {
-	DB, err := gorm.Open(postgres.Open(os.Getenv("DB")), &gorm.Config{})
+	dsn := os.Getenv("DB")
+	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
 	if err != nil {
 		log.Fatal("failed to connect to the DB")
 	}
 
-	CreateTables(DB)
+	DB = db
+
+	CreateTables(db)
 }
 
 func CreateTables(DB *gorm.DB) {

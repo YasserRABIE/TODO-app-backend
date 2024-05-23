@@ -1,6 +1,9 @@
 package main
 
 import (
+	"os"
+
+	"github.com/YasserRABIE/authentication-porject/handlers"
 	"github.com/YasserRABIE/authentication-porject/initializers"
 	"github.com/gin-gonic/gin"
 )
@@ -8,9 +11,13 @@ import (
 func init() {
 	initializers.LoadEnv()
 	initializers.ConnectToDB()
+
 }
 
 func main() {
 	r := gin.Default()
-	r.Run()
+
+	r.POST("/register", handlers.HandleRegister)
+
+	r.Run(os.Getenv("PORT"))
 }

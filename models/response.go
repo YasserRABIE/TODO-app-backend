@@ -10,7 +10,7 @@ type Data struct {
 	Message string `json:"message"`
 }
 
-func NewSuccesResponse(status int, data interface{}) *Response {
+func NewSuccessResponse(status int, data interface{}) *Response {
 	return &Response{
 		Status:  status,
 		Success: true,
