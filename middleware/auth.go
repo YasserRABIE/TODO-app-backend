@@ -34,7 +34,7 @@ func HandleAuth(c *gin.Context) {
 
 func generateJWTToken(username interface{}) (string, error) {
 	claims := jwt.MapClaims{
-		"userName": username,
+		"username": username,
 		"exp":      time.Now().Add(time.Hour * 24 * 30).Unix(), // Token expiration time (30 days from now)
 	}
 
