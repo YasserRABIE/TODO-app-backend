@@ -5,6 +5,7 @@ import (
 
 	"github.com/YasserRABIE/authentication-porject/handlers"
 	"github.com/YasserRABIE/authentication-porject/initializers"
+	"github.com/YasserRABIE/authentication-porject/middleware"
 	"github.com/gin-gonic/gin"
 )
 
@@ -18,6 +19,7 @@ func main() {
 	r := gin.Default()
 
 	r.POST("/register", handlers.HandleRegister)
+	r.POST("/login", handlers.HandleLogin, middleware.HandleAuth)
 
 	r.Run(os.Getenv("PORT"))
 }

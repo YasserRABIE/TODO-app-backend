@@ -7,11 +7,10 @@ import (
 	"github.com/YasserRABIE/authentication-porject/models"
 	"github.com/gin-gonic/gin"
 	"golang.org/x/crypto/bcrypt"
-	"gorm.io/gorm"
 )
 
 func CreateAccount(c *gin.Context, a *models.AccountRequest) error {
-	exists, err := checkIfUserExists(initializers.DB, a.UserName, a.Email)
+	exists, err := checkIfUserExists(a.UserName, a.Email)
 	if exists {
 		return errors.New(err.Error())
 	}
@@ -31,14 +30,41 @@ func CreateAccount(c *gin.Context, a *models.AccountRequest) error {
 	return nil
 }
 
-func checkIfUserExists(db *gorm.DB, username, email string) (bool, error) {
+func GetAccount(l *models.LoginRequest) (*models.User, error) {
+	var user = &models.User{}
+
+	initializers.DB.Where("username= ?", l.UserName).First(&user)
+	if user.ID == 0 {
+		return nil, errors.New("please create an account before proceeding")
+	}
+
+	err := verifyPassword(user.Password, l.Password)
+	if err != nil {
+		return nil, err
+	}
+
+	return user, nil
+}
+
+func checkIfUserExists(username, email string) (bool, error) {
 	var user models.User
 
-	db.Where(&models.User{UserName: username}).First(&user)
+	initializers.DB.Where(&models.User{UserName: username}).First(&user)
 	if user.UserName != "" {
 		return true, errors.New("the user name is used before")
 	}
 
-	db.Where(&models.User{Email: email}).First(&user)
+	initializers.DB.Where(&models.User{Email: email}).First(&user)
 	return user.Email != "", errors.New("the email is used before")
+}
+
+func verifyPassword(hashedPassword, password string) error {
+	if err := bcrypt.CompareHashAndPassword(
+		[]byte(hashedPassword),
+		[]byte(password),
+	); err != nil {
+		return err
+	}
+
+	return nil
 }

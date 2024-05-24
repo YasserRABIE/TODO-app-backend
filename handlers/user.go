@@ -38,7 +38,7 @@ func HandleRegister(c *gin.Context) {
 }
 
 func HandleLogin(c *gin.Context) {
-	loginReq := &models.AccountRequest{}
+	loginReq := &models.LoginRequest{}
 	c.Header("Content-Type", "application/json")
 
 	if err := c.BindJSON(loginReq); err != nil {
@@ -50,4 +50,17 @@ func HandleLogin(c *gin.Context) {
 		return
 	}
 
+	account, err := database.GetAccount(loginReq)
+	if err != nil {
+		resBody := models.NewFailedResponse(400, map[string]string{
+			"error": err.Error(),
+		})
+
+		c.IndentedJSON(http.StatusBadRequest, resBody)
+		return
+	}
+	println(&account)
+
+	c.Set("userName", account.UserName)
+	c.Next()
 }
