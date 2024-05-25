@@ -18,8 +18,8 @@ func init() {
 func main() {
 	r := gin.Default()
 
-	r.POST("/register", handlers.HandleRegister)
-	r.POST("/login", handlers.HandleLogin, middleware.HandleAuth)
+	r.POST("/register", handlers.RegisterHandler)
+	r.POST("/login", handlers.LoginHandler, middleware.HandleAuth)
 
 	r.Run(os.Getenv("PORT"))
 }

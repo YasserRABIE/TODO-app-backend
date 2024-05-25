@@ -8,58 +8,54 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func HandleRegister(c *gin.Context) {
+func RegisterHandler(c *gin.Context) {
 	registerReq := &models.AccountRequest{}
 	c.Header("Content-Type", "application/json")
 
 	if err := c.BindJSON(registerReq); err != nil {
-		resBody := models.NewFailedResponse(400, map[string]string{
-			"error": "Missing information! Please provide username, email and password",
+		resBody := models.NewFailedResponse(http.StatusBadRequest, map[string]string{
+			"error": "Invalid request! Please provide username, email, and password",
 		})
-
-		c.JSON(http.StatusBadRequest, resBody)
+		c.JSON(http.StatusBadRequest, &resBody)
 		return
 	}
 
-	if err := database.CreateAccount(c, registerReq); err != nil {
-		resBody := models.NewFailedResponse(400, map[string]string{
+	if err := database.CreateAccount(registerReq); err != nil {
+		resBody := models.NewFailedResponse(http.StatusConflict, map[string]string{
 			"error": err.Error(),
 		})
-
-		c.IndentedJSON(http.StatusBadRequest, resBody)
+		c.JSON(http.StatusConflict, &resBody)
 		return
 	}
 
-	resBody := models.NewSuccessResponse(200, map[string]interface{}{
-		"message": "account is added successfully",
+	resBody := models.NewSuccessResponse(http.StatusCreated, map[string]interface{}{
+		"message": "Account created successfully",
 	})
-
-	c.JSON(http.StatusOK, &resBody)
+	c.JSON(http.StatusCreated, &resBody)
 }
 
-func HandleLogin(c *gin.Context) {
+func LoginHandler(c *gin.Context) {
 	loginReq := &models.LoginRequest{}
 	c.Header("Content-Type", "application/json")
 
 	if err := c.BindJSON(loginReq); err != nil {
-		resBody := models.NewFailedResponse(400, map[string]string{
-			"error": "Missing information! Please provide username and password",
+		resBody := models.NewFailedResponse(http.StatusBadRequest, map[string]string{
+			"error": "Invalid request! Please provide username and password",
 		})
-
-		c.JSON(http.StatusBadRequest, resBody)
+		c.JSON(http.StatusBadRequest, &resBody)
+		c.Abort()
 		return
 	}
 
 	account, err := database.GetAccount(loginReq)
 	if err != nil {
-		resBody := models.NewFailedResponse(400, map[string]string{
+		resBody := models.NewFailedResponse(http.StatusUnauthorized, map[string]string{
 			"error": err.Error(),
 		})
-
-		c.IndentedJSON(http.StatusBadRequest, resBody)
+		c.JSON(http.StatusUnauthorized, &resBody)
+		c.Abort()
 		return
 	}
-	println(&account)
 
 	c.Set("userName", account.UserName)
 	c.Next()

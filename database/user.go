@@ -1,23 +1,22 @@
 package database
 
 import (
-	"errors"
+	"fmt"
 
 	"github.com/YasserRABIE/authentication-porject/initializers"
 	"github.com/YasserRABIE/authentication-porject/models"
-	"github.com/gin-gonic/gin"
 	"golang.org/x/crypto/bcrypt"
 )
 
-func CreateAccount(c *gin.Context, a *models.AccountRequest) error {
+func CreateAccount(a *models.AccountRequest) error {
 	exists, err := checkIfUserExists(a.UserName, a.Email)
 	if exists {
-		return errors.New(err.Error())
+		return err
 	}
 
-	hash, err := bcrypt.GenerateFromPassword([]byte(a.Password), 10)
+	hash, err := bcrypt.GenerateFromPassword([]byte(a.Password), bcrypt.DefaultCost)
 	if err != nil {
-		return errors.New("failed to hash the pass")
+		return fmt.Errorf("failed to hash the pass")
 	}
 
 	user := &models.User{
@@ -33,9 +32,9 @@ func CreateAccount(c *gin.Context, a *models.AccountRequest) error {
 func GetAccount(l *models.LoginRequest) (*models.User, error) {
 	var user = &models.User{}
 
-	initializers.DB.Where("username= ?", l.UserName).First(&user)
+	initializers.DB.Where(&models.User{UserName: l.UserName}).First(&user)
 	if user.ID == 0 {
-		return nil, errors.New("please create an account before proceeding")
+		return nil, fmt.Errorf("incorrect username or password")
 	}
 
 	err := verifyPassword(user.Password, l.Password)
@@ -49,13 +48,16 @@ func GetAccount(l *models.LoginRequest) (*models.User, error) {
 func checkIfUserExists(username, email string) (bool, error) {
 	var user models.User
 
-	initializers.DB.Where(&models.User{UserName: username}).First(&user)
+	initializers.DB.Where("username= ?", username).First(&user)
 	if user.UserName != "" {
-		return true, errors.New("the user name is used before")
+		return true, fmt.Errorf("the username is already taken")
 	}
 
-	initializers.DB.Where(&models.User{Email: email}).First(&user)
-	return user.Email != "", errors.New("the email is used before")
+	initializers.DB.Where("email= ?", email).First(&user)
+	if user.Email != "" {
+		return true, fmt.Errorf("the email is already registered")
+	}
+	return false, nil
 }
 
 func verifyPassword(hashedPassword, password string) error {
@@ -63,7 +65,7 @@ func verifyPassword(hashedPassword, password string) error {
 		[]byte(hashedPassword),
 		[]byte(password),
 	); err != nil {
-		return err
+		return fmt.Errorf("incorrect password")
 	}
 
 	return nil
