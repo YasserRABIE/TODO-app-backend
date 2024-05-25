@@ -2,3 +2,6 @@
 tmp/
 tmp/main
 tmp/build-errors.log
+
+# Ignore env files
+.env
