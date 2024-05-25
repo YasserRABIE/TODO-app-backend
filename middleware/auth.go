@@ -17,7 +17,7 @@ func HandleAuth(c *gin.Context) {
 
 	token, err := generateJWTToken(c, userName)
 	if err != nil {
-		resBody := models.NewFailedResponse(400, map[string]string{
+		resBody := models.NewFailedResponse(http.StatusUnauthorized, map[string]string{
 			"error": "Failed to generate token",
 		})
 
@@ -25,7 +25,7 @@ func HandleAuth(c *gin.Context) {
 		return
 	}
 
-	resBody := models.NewSuccessResponse(200, map[string]interface{}{
+	resBody := models.NewSuccessResponse(http.StatusOK, map[string]interface{}{
 		"token": token,
 	})
 
@@ -35,7 +35,7 @@ func HandleAuth(c *gin.Context) {
 func RequireAuth(c *gin.Context) {
 	token, err := c.Cookie("Authorization")
 	if err != nil {
-		resBody := models.NewFailedResponse(401, map[string]string{
+		resBody := models.NewFailedResponse(http.StatusUnauthorized, map[string]string{
 			"error": "token is unvalid",
 		})
 
@@ -44,7 +44,7 @@ func RequireAuth(c *gin.Context) {
 	}
 
 	if err := validateToken(token); err != nil {
-		resBody := models.NewFailedResponse(401, map[string]string{
+		resBody := models.NewFailedResponse(http.StatusUnauthorized, map[string]string{
 			"error": err.Error(),
 		})
 
