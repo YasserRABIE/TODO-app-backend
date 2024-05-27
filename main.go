@@ -18,8 +18,20 @@ func init() {
 func main() {
 	r := gin.Default()
 
-	r.POST("/register", handlers.RegisterHandler)
-	r.POST("/login", handlers.LoginHandler, middleware.HandleAuth)
+	// CORS middleware
+	r.Use(func(c *gin.Context) {
+		c.Writer.Header().Set("Access-Control-Allow-Origin", "*")
+		c.Writer.Header().Set("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
+		c.Writer.Header().Set("Access-Control-Allow-Headers", "Content-Type")
+		if c.Request.Method == "OPTIONS" {
+			c.AbortWithStatus(204)
+			return
+		}
+		c.Next()
+	})
+
+	r.POST("/api/register", handlers.RegisterHandler, middleware.HandleAuth)
+	r.POST("/api/login", handlers.LoginHandler, middleware.HandleAuth)
 
 	r.Run(os.Getenv("PORT"))
 }

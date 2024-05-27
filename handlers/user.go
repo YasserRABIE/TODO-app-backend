@@ -16,7 +16,9 @@ func RegisterHandler(c *gin.Context) {
 		resBody := models.NewFailedResponse(http.StatusBadRequest, map[string]string{
 			"error": "Invalid request! Please provide username, email, and password",
 		})
+
 		c.JSON(http.StatusBadRequest, &resBody)
+		c.Abort()
 		return
 	}
 
@@ -24,14 +26,14 @@ func RegisterHandler(c *gin.Context) {
 		resBody := models.NewFailedResponse(http.StatusConflict, map[string]string{
 			"error": err.Error(),
 		})
+
 		c.JSON(http.StatusConflict, &resBody)
+		c.Abort()
 		return
 	}
 
-	resBody := models.NewSuccessResponse(http.StatusCreated, map[string]interface{}{
-		"message": "Account created successfully",
-	})
-	c.JSON(http.StatusCreated, &resBody)
+	c.Set("userName", registerReq.UserName)
+	c.Next()
 }
 
 func LoginHandler(c *gin.Context) {
@@ -42,6 +44,7 @@ func LoginHandler(c *gin.Context) {
 		resBody := models.NewFailedResponse(http.StatusBadRequest, map[string]string{
 			"error": "Invalid request! Please provide username and password",
 		})
+
 		c.JSON(http.StatusBadRequest, &resBody)
 		c.Abort()
 		return
