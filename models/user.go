@@ -2,7 +2,7 @@ package models
 
 type User struct {
 	ID       uint16 `json:"id" gorm:"primaryKey;column:id"`
-	UserName string `json:"userName" gorm:"unique;column:username"`
+	Name     string `json:"name" gorm:"unique;column:name"`
 	Email    string `json:"email" gorm:"unique;column:email"`
 	Password string `json:"password" gorm:"column:password"`
 }
@@ -12,12 +12,12 @@ func (User) TableName() string {
 }
 
 type AccountRequest struct {
-	UserName string `json:"userName"`
+	Name     string `json:"name"`
 	Email    string `json:"email"`
 	Password string `json:"password"`
 }
 
 type LoginRequest struct {
-	UserName string `json:"userName"`
+	Name     string `json:"name"`
 	Password string `json:"password"`
 }

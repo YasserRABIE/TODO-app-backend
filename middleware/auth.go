@@ -57,8 +57,8 @@ func RequireAuth(c *gin.Context) {
 
 func generateJWTToken(c *gin.Context, username interface{}) (string, error) {
 	claims := jwt.MapClaims{
-		"username": username,
-		"exp":      time.Now().Add(time.Hour * 24 * 30).Unix(), // Token expiration time (30 days from now)
+		"name": username,
+		"exp":  time.Now().Add(time.Hour * 24 * 30).Unix(), // Token expiration time (30 days from now)
 	}
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
@@ -94,7 +94,7 @@ func validateToken(tokenString string) error {
 
 	var user models.User
 	initializers.DB.Where(&models.User{
-		UserName: claims["username"].(string),
+		Name: claims["name"].(string),
 	}).First(&user)
 
 	if user.ID == 0 {

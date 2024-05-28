@@ -9,7 +9,7 @@ import (
 )
 
 func CreateAccount(a *models.AccountRequest) error {
-	exists, err := checkIfUserExists(a.UserName, a.Email)
+	exists, err := checkIfUserExists(a.Name, a.Email)
 	if exists {
 		return err
 	}
@@ -20,7 +20,7 @@ func CreateAccount(a *models.AccountRequest) error {
 	}
 
 	user := &models.User{
-		UserName: a.UserName,
+		Name:     a.Name,
 		Email:    a.Email,
 		Password: string(hash),
 	}
@@ -32,9 +32,9 @@ func CreateAccount(a *models.AccountRequest) error {
 func GetAccount(l *models.LoginRequest) (*models.User, error) {
 	var user = &models.User{}
 
-	initializers.DB.Where(&models.User{UserName: l.UserName}).First(&user)
+	initializers.DB.Where(&models.User{Name: l.Name}).First(&user)
 	if user.ID == 0 {
-		return nil, fmt.Errorf("incorrect username or password")
+		return nil, fmt.Errorf("incorrect name or password")
 	}
 
 	err := verifyPassword(user.Password, l.Password)
@@ -45,12 +45,12 @@ func GetAccount(l *models.LoginRequest) (*models.User, error) {
 	return user, nil
 }
 
-func checkIfUserExists(username, email string) (bool, error) {
+func checkIfUserExists(name, email string) (bool, error) {
 	var user models.User
 
-	initializers.DB.Where("username= ?", username).First(&user)
-	if user.UserName != "" {
-		return true, fmt.Errorf("the username is already taken")
+	initializers.DB.Where("name= ?", name).First(&user)
+	if user.Name != "" {
+		return true, fmt.Errorf("the name is already taken")
 	}
 
 	initializers.DB.Where("email= ?", email).First(&user)

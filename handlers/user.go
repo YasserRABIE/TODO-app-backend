@@ -14,7 +14,7 @@ func RegisterHandler(c *gin.Context) {
 
 	if err := c.BindJSON(registerReq); err != nil {
 		resBody := models.NewFailedResponse(http.StatusBadRequest, map[string]string{
-			"error": "Invalid request! Please provide username, email, and password",
+			"error": "Invalid request! Please provide name, email, and password",
 		})
 
 		c.JSON(http.StatusBadRequest, &resBody)
@@ -32,7 +32,7 @@ func RegisterHandler(c *gin.Context) {
 		return
 	}
 
-	c.Set("userName", registerReq.UserName)
+	c.Set("name", registerReq.Name)
 	c.Next()
 }
 
@@ -42,7 +42,7 @@ func LoginHandler(c *gin.Context) {
 
 	if err := c.BindJSON(loginReq); err != nil {
 		resBody := models.NewFailedResponse(http.StatusBadRequest, map[string]string{
-			"error": "Invalid request! Please provide username and password",
+			"error": "Invalid request! Please provide name and password",
 		})
 
 		c.JSON(http.StatusBadRequest, &resBody)
@@ -60,6 +60,6 @@ func LoginHandler(c *gin.Context) {
 		return
 	}
 
-	c.Set("userName", account.UserName)
+	c.Set("name", account.Name)
 	c.Next()
 }
