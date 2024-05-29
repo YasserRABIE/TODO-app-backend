@@ -14,9 +14,9 @@ import (
 )
 
 func HandleAuth(c *gin.Context) {
-	userName, _ := c.Get("userName")
+	name, _ := c.Get("name")
 
-	token, err := generateJWTToken(c, userName)
+	token, err := generateJWTToken(c, name)
 	if err != nil {
 		resBody := models.NewFailedResponse(http.StatusUnauthorized, map[string]string{
 			"error": "Failed to generate token",
@@ -66,9 +66,9 @@ func RequireAuth(c *gin.Context) {
 	c.Next()
 }
 
-func generateJWTToken(c *gin.Context, username interface{}) (string, error) {
+func generateJWTToken(c *gin.Context, name interface{}) (string, error) {
 	claims := jwt.MapClaims{
-		"name": username,
+		"name": name,
 		"exp":  time.Now().Add(time.Hour * 24 * 30).Unix(), // Token expiration time (30 days from now)
 	}
 

@@ -23,6 +23,7 @@ func main() {
 		c.Writer.Header().Set("Access-Control-Allow-Origin", "*")
 		c.Writer.Header().Set("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
 		c.Writer.Header().Set("Access-Control-Allow-Headers", "Content-Type")
+		c.Writer.Header().Set("Access-Control-Allow-Headers", "Authorization")
 		if c.Request.Method == "OPTIONS" {
 			c.AbortWithStatus(204)
 			return
@@ -32,7 +33,7 @@ func main() {
 
 	r.POST("/api/register", handlers.RegisterHandler, middleware.HandleAuth)
 	r.POST("/api/login", handlers.LoginHandler, middleware.HandleAuth)
-	r.POST("/api/account", middleware.RequireAuth, handlers.GetAccountHandler)
+	r.GET("/api/account", middleware.RequireAuth, handlers.GetAccountHandler)
 
 	r.Run(os.Getenv("PORT"))
 }
