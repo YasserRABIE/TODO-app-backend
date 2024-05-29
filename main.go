@@ -32,6 +32,7 @@ func main() {
 
 	r.POST("/api/register", handlers.RegisterHandler, middleware.HandleAuth)
 	r.POST("/api/login", handlers.LoginHandler, middleware.HandleAuth)
+	r.POST("/api/account", middleware.RequireAuth, handlers.GetAccountHandler)
 
 	r.Run(os.Getenv("PORT"))
 }

@@ -63,3 +63,16 @@ func LoginHandler(c *gin.Context) {
 	c.Set("name", account.Name)
 	c.Next()
 }
+
+func GetAccountHandler(c *gin.Context) {
+	name, _ := c.Get("name")
+	email, _ := c.Get("email")
+
+	resBody := models.NewSuccessResponse(http.StatusOK, map[string]interface{}{
+		"name":  name,
+		"email": email,
+	})
+
+	c.JSON(http.StatusOK, &resBody)
+
+}
