@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"net/http"
 	"os"
+	"strings"
 	"time"
 
 	"github.com/YasserRABIE/authentication-porject/initializers"
@@ -33,8 +34,10 @@ func HandleAuth(c *gin.Context) {
 }
 
 func RequireAuth(c *gin.Context) {
-	token, err := c.Cookie("Authorization")
-	if err != nil {
+	bearerToken := c.GetHeader("Authorization")
+
+	tokenParts := strings.Split(bearerToken, " ")
+	if tokenParts[0] != "Bearer" || tokenParts[1] == "" {
 		resBody := models.NewFailedResponse(http.StatusUnauthorized, map[string]string{
 			"error": "token is unvalid",
 		})
@@ -43,7 +46,7 @@ func RequireAuth(c *gin.Context) {
 		c.Abort()
 		return
 	}
-
+	token := tokenParts[1]
 	user, err := validateToken(token)
 	if err != nil {
 		resBody := models.NewFailedResponse(http.StatusUnauthorized, map[string]string{
@@ -74,7 +77,7 @@ func generateJWTToken(c *gin.Context, name interface{}) (string, error) {
 	}
 
 	c.SetSameSite(http.SameSiteNoneMode)
-	c.SetCookie("Authorization", tokenString, 3600*24*30, "", "", false, true)
+	c.SetCookie("Authorization", tokenString, 3600*24*30, "/", "http://localhost:3000/", false, true)
 
 	return tokenString, nil
 }
