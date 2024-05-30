@@ -32,7 +32,7 @@ func CreateAccount(a *models.AccountRequest) error {
 func GetAccount(l *models.LoginRequest) (*models.User, error) {
 	var user = &models.User{}
 
-	initializers.DB.Where(&models.User{Name: l.Name}).First(&user)
+	initializers.DB.Where(&models.User{Email: l.Email}).First(&user)
 	if user.ID == 0 {
 		return nil, fmt.Errorf("incorrect name or password")
 	}
