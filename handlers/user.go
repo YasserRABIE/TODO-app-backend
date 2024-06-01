@@ -13,16 +13,17 @@ func RegisterHandler(c *gin.Context) {
 	c.Header("Content-Type", "application/json")
 
 	if err := c.BindJSON(registerReq); err != nil {
-		resBody := models.NewFailedResponse(http.StatusBadRequest, map[string]string{
+		resBody := models.NewFailedResponse(http.StatusNoContent, map[string]string{
 			"error": "Invalid request! Please provide name, email, and password",
 		})
 
-		c.JSON(http.StatusBadRequest, &resBody)
+		c.JSON(http.StatusNoContent, &resBody)
 		c.Abort()
 		return
 	}
 
-	if err := database.CreateAccount(registerReq); err != nil {
+	user, err := database.CreateAccount(registerReq)
+	if err != nil {
 		resBody := models.NewFailedResponse(http.StatusConflict, map[string]string{
 			"error": err.Error(),
 		})
@@ -32,7 +33,8 @@ func RegisterHandler(c *gin.Context) {
 		return
 	}
 
-	c.Set("name", registerReq.Name)
+	c.Set("name", user.Name)
+
 	c.Next()
 }
 
@@ -41,11 +43,11 @@ func LoginHandler(c *gin.Context) {
 	c.Header("Content-Type", "application/json")
 
 	if err := c.BindJSON(loginReq); err != nil {
-		resBody := models.NewFailedResponse(http.StatusBadRequest, map[string]string{
+		resBody := models.NewFailedResponse(http.StatusNoContent, map[string]string{
 			"error": "Invalid request! Please provide name and password",
 		})
 
-		c.JSON(http.StatusBadRequest, &resBody)
+		c.JSON(http.StatusNoContent, &resBody)
 		c.Abort()
 		return
 	}
@@ -61,6 +63,7 @@ func LoginHandler(c *gin.Context) {
 	}
 
 	c.Set("name", account.Name)
+
 	c.Next()
 }
 
