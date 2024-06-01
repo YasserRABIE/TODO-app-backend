@@ -8,15 +8,15 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
-func CreateAccount(a *models.AccountRequest) error {
+func CreateAccount(a *models.AccountRequest) (*models.User, error) {
 	exists, err := checkIfUserExists(a.Name, a.Email)
 	if exists {
-		return err
+		return nil, err
 	}
 
 	hash, err := bcrypt.GenerateFromPassword([]byte(a.Password), bcrypt.DefaultCost)
 	if err != nil {
-		return fmt.Errorf("failed to hash the pass")
+		return nil, fmt.Errorf("failed to hash the pass")
 	}
 
 	user := &models.User{
@@ -26,7 +26,11 @@ func CreateAccount(a *models.AccountRequest) error {
 	}
 
 	initializers.DB.Create(&user)
-	return nil
+	if user.ID == 0 {
+		return nil, fmt.Errorf("failed to insert user")
+	}
+
+	return user, nil
 }
 
 func GetAccount(l *models.LoginRequest) (*models.User, error) {
