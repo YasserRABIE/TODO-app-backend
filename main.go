@@ -30,9 +30,15 @@ func main() {
 		c.Next()
 	})
 
+	// user handlers
 	r.POST("/api/register", handlers.RegisterHandler, middleware.HandleAuth)
 	r.POST("/api/login", handlers.LoginHandler, middleware.HandleAuth)
 	r.GET("/api/account", middleware.RequireAuth, handlers.GetAccountHandler)
+
+	// task handlers
+	r.GET("/api/tasks", middleware.RequireAuth, handlers.GetAllTasks)
+	r.POST("/api/tasks/add", middleware.RequireAuth, handlers.AddTask)
+	r.POST("/api/tasks/remove", middleware.RequireAuth, handlers.RemoveTask)
 
 	r.Run(os.Getenv("PORT"))
 }
