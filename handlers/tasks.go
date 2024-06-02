@@ -104,3 +104,43 @@ func GetAllTasks(c *gin.Context) {
 
 	c.JSON(http.StatusOK, &resBody)
 }
+
+func GetTasksByFilter(c *gin.Context) {
+	req := &models.TasksByFilterReq{}
+
+	userIdInterface, _ := c.Get("id")
+	userId, ok := userIdInterface.(uint16)
+	if !ok {
+		resBody := models.NewFailedResponse(http.StatusBadRequest, map[string]string{
+			"error": "id is wrong",
+		})
+
+		c.JSON(http.StatusBadRequest, &resBody)
+		return
+	}
+
+	if err := c.BindJSON(req); err != nil {
+		resBody := models.NewFailedResponse(http.StatusNoContent, map[string]string{
+			"error": "Invalid request! Please provide tasks filter",
+		})
+
+		c.JSON(http.StatusNoContent, &resBody)
+		return
+	}
+
+	tasks, err := database.GetTasksByFilter(userId, req.Filter)
+	if err != nil {
+		resBody := models.NewFailedResponse(http.StatusBadRequest, map[string]string{
+			"error": err.Error(),
+		})
+
+		c.JSON(http.StatusBadRequest, &resBody)
+		return
+	}
+
+	resBody := models.NewSuccessResponse(http.StatusOK, map[string]interface{}{
+		"tasks": tasks,
+	})
+
+	c.JSON(http.StatusOK, &resBody)
+}

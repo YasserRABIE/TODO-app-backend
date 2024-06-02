@@ -37,6 +37,7 @@ func main() {
 
 	// task handlers
 	r.GET("/api/tasks", middleware.RequireAuth, handlers.GetAllTasks)
+	r.POST("/api/tasks", middleware.RequireAuth, handlers.GetTasksByFilter)
 	r.POST("/api/tasks/add", middleware.RequireAuth, handlers.AddTask)
 	r.POST("/api/tasks/remove", middleware.RequireAuth, handlers.RemoveTask)
 

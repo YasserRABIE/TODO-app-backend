@@ -48,3 +48,15 @@ func GetTasks(id uint16) ([]models.Task, error) {
 
 	return tasks, nil
 }
+
+func GetTasksByFilter(id uint16, filter string) ([]models.Task, error) {
+	var tasks []models.Task
+
+	if err := initializers.DB.
+		Where("user_id = ? AND filter = ?", id, filter).
+		Find(&tasks).Error; err != nil {
+		return nil, err
+	}
+
+	return tasks, nil
+}

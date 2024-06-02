@@ -22,3 +22,6 @@ type RemoveTaskReq struct {
 	Title  string `json:"title"`
 	Filter string `json:"filter"`
 }
+type TasksByFilterReq struct {
+	Filter string `json:"filter"`
+}
