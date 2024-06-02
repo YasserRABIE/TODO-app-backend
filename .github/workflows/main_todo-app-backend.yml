@@ -4,62 +4,63 @@
 name: Build and deploy ASP.Net Core app to Azure Web App - todo-app-backend
 
 on:
-   push:
-      branches:
-         - main
-   workflow_dispatch:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
 
 jobs:
-   build:
-      runs-on: windows-latest
+  build:
+    runs-on: windows-latest
 
-      steps:
-         - uses: actions/checkout@v4
+    steps:
+      - uses: actions/checkout@v4
 
-         - name: Set up .NET Core
-           uses: actions/setup-dotnet@v1
-           with:
-              dotnet-version: "6.0.x"
-              include-prerelease: true
+      - name: Set up .NET Core
+        uses: actions/setup-dotnet@v1
+        with:
+          dotnet-version: '6.0.x'
+          include-prerelease: true
 
-         - name: Build with dotnet
-           run: dotnet build --configuration Release
+      - name: Build with dotnet
+        run: dotnet build --configuration Release
 
-         - name: dotnet publish
-           run: dotnet publish -c Release -o ${{env.DOTNET_ROOT}}/myapp
+      - name: dotnet publish
+        run: dotnet publish -c Release -o ${{env.DOTNET_ROOT}}/myapp
 
-         - name: Upload artifact for deployment job
-           uses: actions/upload-artifact@v3
-           with:
-              name: .net-app
-              path: ${{env.DOTNET_ROOT}}/myapp
+      - name: Upload artifact for deployment job
+        uses: actions/upload-artifact@v3
+        with:
+          name: .net-app
+          path: ${{env.DOTNET_ROOT}}/myapp
 
-   deploy:
-      runs-on: windows-latest
-      needs: build
-      environment:
-         name: "production"
-         url: ${{ steps.deploy-to-webapp.outputs.webapp-url }}
-      permissions:
-         id-token: write #This is required for requesting the JWT
+  deploy:
+    runs-on: windows-latest
+    needs: build
+    environment:
+      name: 'Production'
+      url: ${{ steps.deploy-to-webapp.outputs.webapp-url }}
+    permissions:
+      id-token: write #This is required for requesting the JWT
 
-      steps:
-         - name: Download artifact from build job
-           uses: actions/download-artifact@v3
-           with:
-              name: .net-app
+    steps:
+      - name: Download artifact from build job
+        uses: actions/download-artifact@v3
+        with:
+          name: .net-app
+      
+      - name: Login to Azure
+        uses: azure/login@v1
+        with:
+          client-id: ${{ secrets.AZUREAPPSERVICE_CLIENTID_16353E63513E45E789EBFB832F23E336 }}
+          tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID_7D554E229B5A4019877D286660CC4FD3 }}
+          subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_E5E2736DCD1248C3964C4BB08C770597 }}
 
-         - name: Login to Azure
-           uses: azure/login@v1
-           with:
-              client-id: ${{ secrets.__clientidsecretname__ }}
-              tenant-id: ${{ secrets.__tenantidsecretname__ }}
-              subscription-id: ${{ secrets.__subscriptionidsecretname__ }}
-
-         - name: Deploy to Azure Web App
-           id: deploy-to-webapp
-           uses: azure/webapps-deploy@v2
-           with:
-              app-name: "todo-app-backend"
-              slot-name: "production"
-              package: .
+      - name: Deploy to Azure Web App
+        id: deploy-to-webapp
+        uses: azure/webapps-deploy@v2
+        with:
+          app-name: 'todo-app-backend'
+          slot-name: 'Production'
+          package: .
+          
