@@ -41,5 +41,12 @@ func main() {
 	r.POST("/api/tasks/add", middleware.RequireAuth, handlers.AddTask)
 	r.POST("/api/tasks/remove", middleware.RequireAuth, handlers.RemoveTask)
 
-	r.Run(os.Getenv("PORT"))
+	port := os.Getenv("HTTP_PLATFORM_PORT")
+
+	// default back to 8080 for local dev
+	if port == "" {
+		port = os.Getenv("PORT")
+	}
+
+	r.Run("127.0.0.1:" + port)
 }
