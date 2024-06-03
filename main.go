@@ -22,7 +22,7 @@ func main() {
 	r.Use(func(c *gin.Context) {
 		c.Writer.Header().Set("Access-Control-Allow-Origin", "*")
 		c.Writer.Header().Set("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
-		c.Writer.Header().Set("Access-Control-Allow-Headers", "Content-Type, Authorization")
+		c.Writer.Header().Set("Access-Control-Allow-Headers", "Content-Type, Authorization, ngrok-skip-browser-warning")
 		if c.Request.Method == "OPTIONS" {
 			c.AbortWithStatus(204)
 			return
@@ -41,12 +41,5 @@ func main() {
 	r.POST("/api/tasks/add", middleware.RequireAuth, handlers.AddTask)
 	r.POST("/api/tasks/remove", middleware.RequireAuth, handlers.RemoveTask)
 
-	port := os.Getenv("HTTP_PLATFORM_PORT")
-
-	// default back to 8080 for local dev
-	if port == "" {
-		port = os.Getenv("PORT")
-	}
-
-	r.Run("127.0.0.1:" + port)
+	r.Run(os.Getenv("PORT"))
 }
