@@ -38,7 +38,7 @@ func GetAccount(l *models.LoginRequest) (*models.User, error) {
 
 	initializers.DB.Where(&models.User{Email: l.Email}).First(&user)
 	if user.ID == 0 {
-		return nil, fmt.Errorf("incorrect name or password")
+		return nil, fmt.Errorf("incorrect email")
 	}
 
 	err := verifyPassword(user.Password, l.Password)
