@@ -58,7 +58,6 @@ func GetTasks(id uint16) ([]models.Task, error) {
 
 	if cache, err := initializers.Cache.Get(ctx, "tasks:"+idString).Result(); err == nil {
 		json.Unmarshal([]byte(cache), &tasks)
-		println("value: ", tasks)
 		return tasks, nil
 	}
 
@@ -72,9 +71,7 @@ func GetTasks(id uint16) ([]models.Task, error) {
 	if err != nil {
 		fmt.Println("Failed to convert to json")
 	}
-	if err := initializers.Cache.Set(ctx, "tasks:"+idString, jsonTasks, 0).Err(); err != nil {
-		fmt.Println("failed to set the tasks")
-	}
+	initializers.Cache.Set(ctx, "tasks:"+idString, jsonTasks, 0).Err()
 
 	return tasks, nil
 }
