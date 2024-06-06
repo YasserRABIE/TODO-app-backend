@@ -46,6 +46,7 @@ func RequireAuth(c *gin.Context) {
 		c.Abort()
 		return
 	}
+	
 	token := tokenParts[1]
 	user, err := validateToken(token)
 	if err != nil {

@@ -1,26 +1,41 @@
 package database
 
 import (
+	"context"
+	"encoding/json"
 	"fmt"
+	"strconv"
 
 	"github.com/YasserRABIE/authentication-porject/initializers"
 	"github.com/YasserRABIE/authentication-porject/models"
 )
 
+var ctx = context.Background()
+
 func CreateTask(r *models.AddTaskReq, id uint16) (*models.Task, error) {
-	task := &models.Task{
+	task := models.Task{
 		Title:   r.Title,
 		Filter:  r.Filter,
 		Color:   r.Color,
 		User_id: id,
 	}
 
-	initializers.DB.Create(task)
+	initializers.DB.Create(&task)
 	if task.ID == 0 {
 		return nil, fmt.Errorf("failed to insert task")
 	}
 
-	return task, nil
+	// update cache
+	var tasks []models.Task
+	idString := strconv.FormatUint(uint64(id), 10)
+	if cache, err := initializers.Cache.Get(ctx, "tasks:"+idString).Result(); err == nil {
+		json.Unmarshal([]byte(cache), &tasks)
+		tasks = append(tasks, task)
+		jsonTasks, _ := json.Marshal(tasks)
+		initializers.Cache.Set(ctx, "tasks:"+idString, jsonTasks, 0)
+	}
+
+	return &task, nil
 }
 
 func RemoveTask(r *models.RemoveTaskReq) error {
@@ -39,11 +54,26 @@ func RemoveTask(r *models.RemoveTaskReq) error {
 
 func GetTasks(id uint16) ([]models.Task, error) {
 	var tasks []models.Task
+	idString := strconv.FormatUint(uint64(id), 10)
+
+	if cache, err := initializers.Cache.Get(ctx, "tasks:"+idString).Result(); err == nil {
+		json.Unmarshal([]byte(cache), &tasks)
+		println("value: ", tasks)
+		return tasks, nil
+	}
 
 	if err := initializers.DB.
-		Where("user_id = ?", id).
+		Where("user_id = ?", idString).
 		Find(&tasks).Error; err != nil {
 		return nil, err
+	}
+
+	jsonTasks, err := json.Marshal(tasks)
+	if err != nil {
+		fmt.Println("Failed to convert to json")
+	}
+	if err := initializers.Cache.Set(ctx, "tasks:"+idString, jsonTasks, 0).Err(); err != nil {
+		fmt.Println("failed to set the tasks")
 	}
 
 	return tasks, nil
@@ -51,11 +81,27 @@ func GetTasks(id uint16) ([]models.Task, error) {
 
 func GetTasksByFilter(id uint16, filter string) ([]models.Task, error) {
 	var tasks []models.Task
+	idString := strconv.FormatUint(uint64(id), 10)
+
+	if cache, err := initializers.Cache.Get(ctx, filter+":"+idString).Result(); err == nil {
+		json.Unmarshal([]byte(cache), &tasks)
+		println("value: ", tasks)
+		return tasks, nil
+	}
 
 	if err := initializers.DB.
 		Where("user_id = ? AND filter = ?", id, filter).
 		Find(&tasks).Error; err != nil {
 		return nil, err
+	}
+
+	jsonTasks, err := json.Marshal(tasks)
+	if err != nil {
+		fmt.Println("Failed to convert to json")
+	}
+
+	if err := initializers.Cache.Set(ctx, filter+":"+idString, jsonTasks, 0).Err(); err != nil {
+		fmt.Println("failed to set the tasks")
 	}
 
 	return tasks, nil
