@@ -5,11 +5,13 @@ import (
 	"os"
 
 	"github.com/YasserRABIE/authentication-porject/models"
+	"github.com/redis/go-redis/v9"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 )
 
 var DB *gorm.DB
+var Cache *redis.Client
 
 func ConnectToDB() {
 	dsn := os.Getenv("DB")
@@ -31,4 +33,14 @@ func CreateTables(DB *gorm.DB) {
 	if err := DB.AutoMigrate(&models.Task{}); err != nil {
 		log.Fatal("failed to create task table")
 	}
+}
+
+func RedisConn() {
+	client := redis.NewClient(&redis.Options{
+		Addr:     "localhost:6379",
+		Password: "", // no password set
+		DB:       0,  // use default DB
+	})
+
+	Cache = client
 }

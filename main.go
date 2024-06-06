@@ -12,7 +12,7 @@ import (
 func init() {
 	initializers.LoadEnv()
 	initializers.ConnectToDB()
-
+	initializers.RedisConn()
 }
 
 func main() {
