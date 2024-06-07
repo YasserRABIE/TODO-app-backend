@@ -39,14 +39,19 @@ func CreateTask(r *models.AddTaskReq, id uint16) (*models.Task, error) {
 }
 
 func RemoveTask(r *models.RemoveTaskReq) error {
+	// delete the task
 	result := initializers.DB.
 		Where("title = ?", r.Title).
 		Where("filter = ?", r.Filter).
 		First(&models.Task{}).
 		Delete(&models.Task{})
-
 	if result.RowsAffected == 0 {
 		return fmt.Errorf("failed to delete task")
+	}
+
+	// delete all cache
+	if err := initializers.Cache.FlushDB(ctx).Err(); err != nil {
+		fmt.Println("failed to delete cache")
 	}
 
 	return nil
